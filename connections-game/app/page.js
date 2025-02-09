@@ -1,7 +1,28 @@
 'use client'
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
+// ----------------------------
+// Helper: Load State from localStorage
+// ----------------------------
+// This function checks localStorage for a saved game state value (by key)
+// and returns it if available; otherwise, it returns the provided default.
+const loadState = (key, defaultValue) => {
+  if (typeof window !== "undefined") {
+    const saved = localStorage.getItem("connectionsGameState");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed[key] !== undefined) {
+          return parsed[key];
+        }
+      } catch (e) {
+        console.error("Error parsing saved game state", e);
+      }
+    }
+  }
+  return defaultValue;
+};
 
 const groupsData = [
   {
@@ -39,7 +60,7 @@ const generateWords = () => {
   groupsData.forEach((group) => {
     group.words.forEach((word) => {
       words.push({
-        id: word, 
+        id: word,
         text: word,
         groupId: group.id,
       });
@@ -47,7 +68,6 @@ const generateWords = () => {
   });
   return words;
 };
-
 
 function shuffleArray(array) {
   const arr = array.slice();
@@ -58,18 +78,31 @@ function shuffleArray(array) {
   return arr;
 }
 
-
 export default function Home() {
   const mistakesAllowed = 4;
 
-  const [words, setWords] = useState(shuffleArray(generateWords()));
+  const [words, setWords] = useState(() => {
+    return loadState("words", shuffleArray(generateWords()));
+  });
   const [selected, setSelected] = useState([]);
-  const [guessedGroups, setGuessedGroups] = useState([]);
-  const [mistakes, setMistakes] = useState(0);
+  const [guessedGroups, setGuessedGroups] = useState(() => {
+    return loadState("guessedGroups", []);
+  });
+  const [mistakes, setMistakes] = useState(() => {
+    return loadState("mistakes", 0);
+  });
 
+  useEffect(() => {
+    const gameState = {
+      words,
+      guessedGroups,
+      mistakes,
+    };
+    localStorage.setItem("connectionsGameState", JSON.stringify(gameState));
+  }, [words, guessedGroups, mistakes]);
 
   const handleCardClick = (wordId) => {
-    if (mistakes >= mistakesAllowed) return; 
+    if (mistakes >= mistakesAllowed) return;
 
     if (selected.includes(wordId)) {
       setSelected(selected.filter((id) => id !== wordId));
@@ -120,7 +153,6 @@ export default function Home() {
     }
   };
 
-
   return (
     <div className="min-h-screen bg-white p-4 text-black">
       <div className="mx-auto w-[50%]">
@@ -129,8 +161,6 @@ export default function Home() {
         <div className="flex justify-center items-center mb-4">
           Create four groups of four!
         </div>
-
-        
 
         <div className="mb-4">
           {guessedGroups.map((groupId) => {
@@ -170,8 +200,8 @@ export default function Home() {
 
         <div className="flex justify-center space-x-4">
           <button
-              onClick={handleShuffle}
-              className="px-4 py-2 border border-black rounded-full"
+            onClick={handleShuffle}
+            className="px-4 py-2 border border-black rounded-full"
           >
             Shuffle
           </button>
@@ -181,10 +211,9 @@ export default function Home() {
           >
             Deselect All
           </button>
-          
           <button
             onClick={handleSubmitGuess}
-            className={` px-4 py-2 border border-black rounded-full ${selected.length == 4 ? "bg-black text-white" : "opacity-50"}`}
+            className={`px-4 py-2 border border-black rounded-full ${selected.length == 4 ? "bg-black text-white" : "opacity-50"}`}
           >
             Submit
           </button>

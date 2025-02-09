@@ -141,7 +141,7 @@ export default function Home() {
         <div className="flex justify-center space-x-4">
           <button onClick={handleShuffle} className="px-4 py-2 bg-white border border-black rounded-full">Shuffle</button>
           <button onClick={handleClearSelection} className={`px-4 py-2 bg-white border border-black rounded-full ${selected.length > 0 ? "" : "opacity-50"}`}>Deselect All</button>
-          <button onClick={handleSubmitGuess} className={`px-4 py-2 bg-white border border-black rounded-full ${selected.length !== 4 ? "opacity-50 ": "text-white bg-black"}`}>Submit</button>
+          <button onClick={handleSubmitGuess} className={`px-4 py-2  border border-black rounded-full ${selected.length !== 4 ? "opacity-50 ": "bg-black text-white"}`}>Submit</button>
         </div>
         {mistakes >= mistakesAllowed && (
           <div className="text-center mt-4 text-red-500 font-bold">Game Over</div>

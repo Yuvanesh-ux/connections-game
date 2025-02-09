@@ -122,71 +122,80 @@ export default function Home() {
 
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <h1 className="text-3xl font-bold text-center mb-4">Connections Game</h1>
+    <div className="min-h-screen bg-white p-4 text-black">
+      <div className="mx-auto w-[50%]">
+        <h1 className="text-3xl font-bold text-center mb-4">Connections Game</h1>
 
-      <div className="flex justify-center items-center mb-4">
-        <span className="mr-2">Mistakes Remaining:</span>
-        <div className="flex">
-          {[...Array(mistakesAllowed - mistakes)].map((_, i) => (
-            <div key={i} className="w-4 h-4 bg-red-500 rounded-full mx-1"></div>
+        <div className="flex justify-center items-center mb-4">
+          Create four groups of four!
+        </div>
+
+        
+
+        <div className="mb-4">
+          {guessedGroups.map((groupId) => {
+            const group = groupsData.find((g) => g.id === groupId);
+            return (
+              <div
+                key={groupId}
+                className={`p-4 py-8 mb-2 ${group.colorClass} text-center font-bold uppercase rounded`}
+              >
+                {group.name}: {group.words.join(", ")}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="grid grid-cols-4 gap-2 mb-4">
+          {words.map((word) => (
+            <div
+              key={word.id}
+              className={`p-2 py-5 border rounded text-center font-bold uppercase cursor-pointer select-none 
+                ${selected.includes(word.id) ? "bg-blue-200" : "bg-gray-200"}`}
+              onClick={() => handleCardClick(word.id)}
+            >
+              {word.text}
+            </div>
           ))}
         </div>
-      </div>
 
-      <div className="mb-4">
-        {guessedGroups.map((groupId) => {
-          const group = groupsData.find((g) => g.id === groupId);
-          return (
-            <div
-              key={groupId}
-              className={`p-4 mb-2 ${group.colorClass} text-center font-bold rounded`}
-            >
-              {group.name}: {group.words.join(", ")}
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="grid grid-cols-4 gap-4 mb-4">
-        {words.map((word) => (
-          <div
-            key={word.id}
-            className={`p-4 border rounded text-center cursor-pointer select-none 
-              ${selected.includes(word.id) ? "bg-blue-200" : "bg-white"}`}
-            onClick={() => handleCardClick(word.id)}
-          >
-            {word.text}
+        <div className="flex justify-center items-center mb-4">
+          <span className="mr-2">Mistakes Remaining:</span>
+          <div className="flex">
+            {[...Array(mistakesAllowed - mistakes)].map((_, i) => (
+              <div key={i} className="w-4 h-4 bg-gray-700 rounded-full mx-1"></div>
+            ))}
           </div>
-        ))}
-      </div>
-
-      <div className="flex justify-center space-x-4">
-        <button
-          onClick={handleClearSelection}
-          className="px-4 py-2 bg-gray-300 rounded"
-        >
-          Clear Selection
-        </button>
-        <button
-          onClick={handleShuffle}
-          className="px-4 py-2 bg-gray-300 rounded"
-        >
-          Shuffle
-        </button>
-        <button
-          onClick={handleSubmitGuess}
-          className="px-4 py-2 bg-green-300 rounded"
-        >
-          Submit Guess
-        </button>
-      </div>
-
-      {mistakes >= mistakesAllowed && (
-        <div className="text-center mt-4 text-red-500 font-bold">
-          Game Over
         </div>
-      )}
+
+        <div className="flex justify-center space-x-4">
+          <button
+              onClick={handleShuffle}
+              className="px-4 py-2 border border-black rounded-full"
+          >
+            Shuffle
+          </button>
+          <button
+            onClick={handleClearSelection}
+            className={`px-4 py-2 border border-black rounded-full ${selected.length > 0 ? "" : "opacity-50"}`}
+          >
+            Deselect All
+          </button>
+          
+          <button
+            onClick={handleSubmitGuess}
+            className={` px-4 py-2 border border-black rounded-full ${selected.length == 4 ? "bg-black text-white" : "opacity-50"}`}
+          >
+            Submit
+          </button>
+        </div>
+
+        {mistakes >= mistakesAllowed && (
+          <div className="text-center mt-4 text-red-500 font-bold">
+            Game Over
+          </div>
+        )}
+      </div>
     </div>
   );
 }

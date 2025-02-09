@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 const groupsData = [
@@ -37,9 +37,31 @@ export default function Home() {
   const mistakesAllowed = 4;
   const [words, setWords] = useState(shuffleArray(generateWords()));
   const [selected, setSelected] = useState([]);
-  const [guessedGroups, setGuessedGroups] = useState([]);
+  const [guessedGroups, setGuessedGroups] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("guessedGroups");
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
   const [mistakes, setMistakes] = useState(0);
   const [animatingGroup, setAnimatingGroup] = useState(null);
+
+  useEffect(() => {
+    const savedGroups = localStorage.getItem("guessedGroups");
+    if (savedGroups) {
+      const parsedGroups = JSON.parse(savedGroups);
+      setGuessedGroups(parsedGroups);
+      setWords((prevWords) =>
+        prevWords.filter((word) => !parsedGroups.includes(word.groupId))
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("guessedGroups", JSON.stringify(guessedGroups));
+  }, [guessedGroups]);
+  
 
   const handleCardClick = (wordId) => {
     if (mistakes >= mistakesAllowed || animatingGroup) return;
@@ -91,6 +113,8 @@ export default function Home() {
       setMistakes(mistakes + 1);
       setSelected([]);
     }
+
+    
   };
 
   return (
@@ -141,7 +165,7 @@ export default function Home() {
         <div className="flex justify-center space-x-4">
           <button onClick={handleShuffle} className="px-4 py-2 bg-white border border-black rounded-full">Shuffle</button>
           <button onClick={handleClearSelection} className={`px-4 py-2 bg-white border border-black rounded-full ${selected.length > 0 ? "" : "opacity-50"}`}>Deselect All</button>
-          <button onClick={handleSubmitGuess} className={`px-4 py-2 bg-white border border-black rounded-full ${selected.length !== 4 ? "opacity-50 ": "text-white bg-black"}`}>Submit</button>
+          <button onClick={handleSubmitGuess} className={`px-4 py-2  border border-black rounded-full ${selected.length !== 4 ? "opacity-50 ": "text-white bg-black"}`}>Submit</button>
         </div>
         {mistakes >= mistakesAllowed && (
           <div className="text-center mt-4 text-red-500 font-bold">Game Over</div>
